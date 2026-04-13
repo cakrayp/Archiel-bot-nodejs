@@ -105,16 +105,17 @@ client.on('message', async (message) => {
     let isGreeting = ['Hai', 'hai', 'Hi', 'hi'].includes(message.content);
     if (isGreeting) {
         is_request_to_sent_message = true;
-        await message.channel.send(`Hai juga ${message.author.username}`);
+        // Delay pengiriman pesan selama 6 detik untuk memberikan kesan "manusiawi" dan mencegah spam.
+        setTimeout(async () => {
+            await message.channel.send(`Hai juga ${message.author.username}`);
+        }, 6000);
         logger(
             color("[MESSAGE SENT]:", "aqua"),
             `Message has been sent to "${message.author.username}" with ID "${message.author.id}"`
         );
 
-        // Set cooldown untuk mencegah pengiriman pesan berulang selama 6 detik.
-        setTimeout(() => {
-            is_request_to_sent_message = false;
-        }, 6000);
+        // Set cooldown untuk mencegah pengiriman pesan berulang.
+        is_request_to_sent_message = false;
     };
 });
 
