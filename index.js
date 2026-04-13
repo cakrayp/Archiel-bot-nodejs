@@ -25,8 +25,8 @@ Features:
 Global Variables:
     - is_request_to_sent_message: Flag to prevent concurrent message sending during cooldown
 Events:
-    - on_ready(): Triggered when bot successfully connects to Discord
-    - on_message(): Triggered when a message is received in any channel the bot can access
+    - client.on('ready'): Triggered when bot successfully connects to Discord
+    - client.on('message'): Triggered when a message is received in any channel the bot can access
  */
 
 const { Client } = require('discord.js-selfbot-v13');
@@ -34,6 +34,7 @@ const { loggerSetup, logLevels } = require('./lib/logger');
 const { color, bgcolor } = require('./lib/color');
 require('dotenv').config();
 
+// Load environment variables
 const TOKEN = process.env.TOKEN;
 const TARGET_USER_ID = process.env.TARGET_USER_ID;
 const MY_USER_ID = process.env.MY_USER_ID;
@@ -53,7 +54,7 @@ const { logger } = loggerSetup({
 
 
 // Start
-let is_request_to_sent_message = false;
+let is_request_to_sent_message = false;   // Flag to prevent concurrent message sending during cooldown
 
 client.on('ready', () => {
     logger(
@@ -69,7 +70,7 @@ client.on('message', async (message) => {
         color("[MESSAGE RECEIVED]:", "aqua"),
         `Message received from "${message.author.username}"` +
         `${(message.author.globalName != message.author.username && message.author.globalName != null) ? ` (${message.author.globalName})` : ''}`,
-        `${message.content ? (` with content "${message.content}"`) : 'with no content'}`,
+        `${message.content ? (`with content "${message.content}"`) : 'with no content'}`,
         `in server "${message.guild?.name ? message.guild.name : 'in Direct Message'}"`,
         `and ID "${message.author.id}"`
     );
@@ -82,7 +83,20 @@ client.on('message', async (message) => {
     if (isPingCommand && message.author.id === MY_USER_ID) {
         is_request_to_sent_message = true;
         let latency = Date.now() - message.createdTimestamp;
-        await message.channel.send(`**Pong!** Latency: ${latency}ms\nAPI Latency: ${client.ws.ping}ms\nUptime: ${Math.floor(client.uptime / 1000)}s\nNode.js Version: ${process.version}\nDiscord.js Version: ${require('discord.js-selfbot-v13').version}\n\n**Note:** This latency check is for testing purposes and may not reflect actual latency in production environments.`);
+
+        // Menyusun pesan latency dengan informasi tambahan seperti API latency, uptime, Node.js version, dan Discord.js version.
+        let latencyText = "";
+        latencyText += `**Pong!** Latency: ${latency}ms\n`;
+        latencyText += `API Latency: ${client.ws.ping}ms\n`;
+        latencyText += `Uptime: ${Math.floor(client.uptime / 1000)}s\n`;
+        latencyText += `Node.js Version: ${process.version}\n`;
+        latencyText += `Discord.js Version: ${require('discord.js-selfbot-v13').version}\n\n`;
+        latencyText += `**Note:** This latency check is for testing purposes and may not reflect actual latency in production environments.`;
+        latencyText = latencyText.trim(); // Remove any extra whitespace
+
+        // Kirim pesan latency ke channel yang sama dengan pesan perintah ping.
+        await message.channel.send(latencyText);
+
         logger(
             color("[MESSAGE SENT]:", "aqua"),
             color("[OWNER]:"),
@@ -107,8 +121,16 @@ client.on('message', async (message) => {
         is_request_to_sent_message = true;
         // Delay pengiriman pesan selama 6 detik untuk memberikan kesan "manusiawi" dan mencegah spam.
         setTimeout(async () => {
-            await message.channel.send(`Hai juga <@${message.author.id}>`);
+            let randomGreetings = [
+                `Hai <@${message.author.id}>`,
+                `Hai juga <@${message.author.id}>`,
+                `Hai juga anomali <@${message.author.id}>`,
+            ];
+            let randomIndex = Math.floor(Math.random() * randomGreetings.length);
+            let greetingMessage = (message.content.toLowerCase() === 'hi') ? randomGreetings[randomIndex].replace('Hai', 'Hi') : randomGreetings[randomIndex];
+            await message.channel.send(greetingMessage);
         }, 6000);
+
         logger(
             color("[MESSAGE SENT]:", "aqua"),
             `Message has been sent to "${message.author.username}" with ID "${message.author.id}"`
