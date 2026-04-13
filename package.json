@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Menyapa dengan anomali termasuk archiel.",
   "keywords": [
-    "['discord'",
-    "'self-bot'",
-    "'discord-selfbot'",
-    "'nodejs']"
+    "discord",
+    "self-bot",
+    "discord-selfbot",
+    "nodejs"
   ],
   "homepage": "https://github.com/cakrayp/Archiel-bot-nodejs#readme",
   "bugs": {
