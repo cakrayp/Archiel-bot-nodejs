@@ -80,6 +80,7 @@ client.on('message', async (message) => {
     // Cek apakah pesan adalah perintah ping (hanya untuk pemilik bot)
     let isPingCommand = ['ping', 'Ping', 'PING'].includes(message.content);
     if (isPingCommand && message.author.id === MY_USER_ID) {
+        is_request_to_sent_message = true;
         let latency = Date.now() - message.createdTimestamp;
         await message.channel.send(`**Pong!** Latency: ${latency}ms\nAPI Latency: ${client.ws.ping}ms\nUptime: ${Math.floor(client.uptime / 1000)}s\nNode.js Version: ${process.version}\nDiscord.js Version: ${require('discord.js-selfbot-v13').version}\n\n**Note:** This latency check is for testing purposes and may not reflect actual latency in production environments.`);
         logger(
@@ -89,7 +90,6 @@ client.on('message', async (message) => {
         );
 
         // Set cooldown untuk mencegah pengiriman pesan berulang selama 6 detik.
-        is_request_to_sent_message = true;
         setTimeout(() => {
             is_request_to_sent_message = false;
         }, 6000);
@@ -104,11 +104,17 @@ client.on('message', async (message) => {
     // Cek apakah pesan adalah salam (Hai, hai, Hi, hi)
     let isGreeting = ['Hai', 'hai', 'Hi', 'hi'].includes(message.content);
     if (isGreeting) {
-        await message.channel.send(`Hai juga, ${message.author.username}`);
+        is_request_to_sent_message = true;
+        await message.channel.send(`Hai juga ${message.author.username}`);
         logger(
             color("[MESSAGE SENT]:", "aqua"),
             `Message has been sent to "${message.author.username}" with ID "${message.author.id}"`
         );
+
+        // Set cooldown untuk mencegah pengiriman pesan berulang selama 6 detik.
+        setTimeout(() => {
+            is_request_to_sent_message = false;
+        }, 6000);
     };
 });
 
