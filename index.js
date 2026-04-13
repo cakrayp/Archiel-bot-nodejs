@@ -107,7 +107,7 @@ client.on('message', async (message) => {
         is_request_to_sent_message = true;
         // Delay pengiriman pesan selama 6 detik untuk memberikan kesan "manusiawi" dan mencegah spam.
         setTimeout(async () => {
-            await message.channel.send(`Hai juga ${message.author.username}`);
+            await message.channel.send(`Hai juga <@${message.author.id}>`);
         }, 6000);
         logger(
             color("[MESSAGE SENT]:", "aqua"),
