@@ -75,6 +75,9 @@ client.on('message', async (message) => {
         `and ID "${message.author.id}"`
     );
 
+    // Menghindari merespons pesan dari bot itu sendiri.
+    if (message.author.id === client.user.id) return;
+
     // Menghindari pengiriman pesan berulang selama cooldown.
     if (is_request_to_sent_message) return;
 
@@ -107,10 +110,9 @@ client.on('message', async (message) => {
         setTimeout(() => {
             is_request_to_sent_message = false;
         }, 6000);
-    };
 
-    // Menghindari merespons pesan dari bot itu sendiri.
-    if (message.author.id === client.user.id) return;
+        return; // Menghindari memproses logika lain setelah merespons perintah ping.
+    };
 
     // Menghindari merespons pesan dari pengguna lain selain target user.
     if (message.author.id !== TARGET_USER_ID) return;
@@ -121,23 +123,28 @@ client.on('message', async (message) => {
         is_request_to_sent_message = true;
         // Delay pengiriman pesan selama 6 detik untuk memberikan kesan "manusiawi" dan mencegah spam.
         setTimeout(async () => {
+            let target_user_id = message.author.id;   // "TARGET_USER_ID" diambil dari environment variable, tetapi kita gunakan ID dari pesan yang diterima untuk memastikan respons yang tepat.
             let randomGreetings = [
-                `Hai <@${message.author.id}>`,
-                `Hai juga <@${message.author.id}>`,
-                `Hai juga anomali <@${message.author.id}>`,
+                `Hai <@${target_user_id}>`,
+                `Hai juga <@${target_user_id}>`,
+                `Hai juga anomali <@${target_user_id}>`,
             ];
             let randomIndex = Math.floor(Math.random() * randomGreetings.length);
             let greetingMessage = (message.content.toLowerCase() === 'hi') ? randomGreetings[randomIndex].replace('Hai', 'Hi') : randomGreetings[randomIndex];
             await message.channel.send(greetingMessage);
+
+            // Set cooldown untuk mencegah pengiriman pesan berulang.
+            is_request_to_sent_message = false;
+
+            // Log pesan yang telah dikirim sebagai respons terhadap salam.
+            logger(
+                color("[MESSAGE SENT]:", "aqua"),
+                color("[TARGET USER]:"),
+                `Message has been sent to "${message.author.username}" with ID "${message.author.id}"`
+            );
         }, 6000);
 
-        logger(
-            color("[MESSAGE SENT]:", "aqua"),
-            `Message has been sent to "${message.author.username}" with ID "${message.author.id}"`
-        );
-
-        // Set cooldown untuk mencegah pengiriman pesan berulang.
-        is_request_to_sent_message = false;
+        return; // Menghindari memproses logika lain setelah merespons salam.
     };
 });
 
